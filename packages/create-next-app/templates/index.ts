@@ -6,7 +6,7 @@ import { async as glob } from 'fast-glob'
 import os from 'os'
 import fs from 'fs'
 import path from 'path'
-import { cyan, bold } from 'picocolors'
+import { cyan, magenta, bold } from 'picocolors'
 import { Sema } from 'async-sema'
 
 import { GetTemplateFileArgs, InstallTemplateArgs } from './types'
@@ -204,6 +204,8 @@ export const installTemplate = async ({
     }`,
   ]
 
+  const devDependencies = []
+
   /**
    * TypeScript projects will have type definitions and other devDependencies.
    */
@@ -227,7 +229,7 @@ export const installTemplate = async ({
    * Default eslint dependencies.
    */
   if (eslint) {
-    dependencies.push('eslint', 'eslint-config-next')
+    devDependencies.push('eslint', 'eslint-config-next')
   }
   /**
    * Install package.json dependencies if they exist.
@@ -241,6 +243,22 @@ export const installTemplate = async ({
     console.log()
 
     await install(root, dependencies, installFlags)
+  }
+  /**
+   * Install package.json devDependencies if they exist.
+   */
+  if (devDependencies.length) {
+    console.log()
+    console.log('Installing devDependencies:')
+    for (const devDependency of devDependencies) {
+      console.log(`- ${magenta(devDependency)}`)
+    }
+    console.log()
+
+    await install(root, devDependencies, {
+      ...installFlags,
+      devDependencies: true,
+    })
   }
 }
 
